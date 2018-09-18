@@ -193,7 +193,7 @@ class PerfModel:
         layer = self.net.layers[idx]
         if layer.get_type() in ["ConvolutionLayer", "FPGABipolarConvThresholdLayer"]:
             S = float(self.net.layers[idx].get_stride())
-            input_gen =  (np.ceil(K/S)+1) * (np.ceil(S*N*C/SIMD)/512) * np.ceil((SIMD*A)/36.0)
+            input_gen =  (np.ceil(K/S)+1) * np.ceil((S*N*C/SIMD)/512.0) * (np.ceil((SIMD*A)/36.0))
 		# WM
 	    WM = 0
         if layer.get_type() in ["ConvolutionLayer", "FPGABipolarConvThresholdLayer"]:

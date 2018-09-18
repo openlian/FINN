@@ -446,6 +446,10 @@ class FPGABipolarConvThresholdLayer(lb.MatrixThresholdLayer, cg.StreamingMatrixC
         "Number of single input elements for this layer"
         return self.mlayer.ifm * self.mlayer.idim * self.mlayer.idim
 
+    def getThresNumInputElems(self):
+        kernel = self.mlayer.get_filter_dim()
+        return self.mlayer.ifm * kernel * kernel
+
     def getNumOutputElems(self):
         "Number of single output elements for this layer"
         return self.mlayer.ofm * self.mlayer.odim * self.mlayer.odim
@@ -469,7 +473,8 @@ class FPGABipolarConvThresholdLayer(lb.MatrixThresholdLayer, cg.StreamingMatrixC
         if self.isBipolarTimesBipolar():
             # TODO also need to check if thresholding is bipolar here
             # ensure positive thresholds for BNNs
-            return makePositiveThresholds(self.tlayer.thresholds, self.getNumInputElems())
+            #return makePositiveThresholds(self.tlayer.thresholds, self.getNumInputElems())
+            return makePositiveThresholds(self.tlayer.thresholds, self.getThresNumInputElems())
         elif self.isBipolarTimesRegular():
             # return thresholds as-is for QNN thresholding
             return self.tlayer.thresholds
@@ -508,7 +513,8 @@ class FPGABipolarConvThresholdLayer(lb.MatrixThresholdLayer, cg.StreamingMatrixC
             ret += "%d, %d, " % (self.mlayer.k, self.mlayer.ifm)
             ret += "%d, %d, %d, %d, " % (self.mlayer.get_in_dim(), self.mlayer.ofm,  self.mlayer.get_out_dim(), self.mlayer.stride)
             ret += "%d, %d, " % (self.getSIMD(), self.getPE())
-            ret += "%d, %d, %d>" % (16, self.getWMemCount(), self.getTMemCount()) #XXX Hard coded popcount width to 16.
+            #ret += "%d, %d, %d>" % (16, self.getWMemCount(), self.getTMemCount()) #XXX Hard coded popcount width to 16.
+            ret += "%d, %d, %d>" % (self.getAccWidth(), self.getWMemCount(), self.getTMemCount()) #XXX Hard coded popcount width to 16.
             ret += "(%s, %s, " % (self.getIBufName(), self.getOBufName())
             ret += "%s, %s, " % (self.getWMemName(), self.getTMemName())
             ret += "numReps);"
